@@ -1,0 +1,37 @@
+name: Daily Stock Briefing
+
+'on':
+  schedule:
+    - cron: '0 22 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  briefing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily briefing
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          TO_EMAIL: seanc1122@gmail.com
+          FROM_EMAIL: seanc1122@gmail.com
+        run: python stock_briefing.py
+
+      - name: Upload HTML artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: briefing-${{ github.run_id }}
+          path: briefing_latest.html
+          retention-days: 7
