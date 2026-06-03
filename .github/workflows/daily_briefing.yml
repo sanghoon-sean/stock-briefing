@@ -28,10 +28,14 @@ jobs:
           FROM_EMAIL: seanc1122@gmail.com
         run: python stock_briefing.py
 
-      - name: Upload HTML artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: briefing-${{ github.run_id }}
-          path: briefing_latest.html
-          retention-days: 7
+      - name: Debug Python
+        run: |
+          python -c "print('Python OK'); import yfinance; print('yfinance OK'); import requests; print('requests OK')"
+
+      - name: Run daily briefing
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          TO_EMAIL: seanc1122@gmail.com
+          FROM_EMAIL: seanc1122@gmail.com
+          PYTHONUNBUFFERED: "1"
+        run: python -u stock_briefing.py 2>&1
